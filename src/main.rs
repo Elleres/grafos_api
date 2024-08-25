@@ -4,7 +4,7 @@ use grafo_lib::grafo::Grafo;
 
 fn main() { 
   // Cria instancia grafo
-  let mut grafo_matriz_instancia = Grafo::new();
+  let mut grafo_matriz_instancia = Grafo::new(false);
 
   // insere vertices
   grafo_matriz_instancia.inserir_vertice(1);

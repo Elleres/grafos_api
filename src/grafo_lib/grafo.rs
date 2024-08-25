@@ -8,20 +8,23 @@ pub struct Grafo{
     // O atributo arestas é a implementação de lista de adjacencias
     // O atributo matriz é a implementacao de uma matriz de adjacencia
     // O atributo matriz_acess é apenas para realizar o acesso na listas de forma correta
+    // O atributo direcionado define se o grafo é direcionada ou não
     pub vertices: Vec<i32>,
     pub arestas: BTreeMap<i32, HashSet<i32>>,
     pub matriz: Vec<Vec<bool>>,
-    pub matriz_acess: BTreeMap<i32, i32>
+    pub matriz_acess: BTreeMap<i32, i32>,
+    pub direcionado: bool
 }
 
 impl Grafo  {
     // Função constructor, aloca na memória espaco
-    pub fn new() -> Self{
+    pub fn new(dir: bool) -> Self{
         Grafo {
             vertices: Vec::new(), 
             matriz: Vec::new(),
             arestas: BTreeMap::new(),
-            matriz_acess: BTreeMap::new()
+            matriz_acess: BTreeMap::new(),
+            direcionado: dir
         }
     }
     
@@ -55,8 +58,17 @@ impl Grafo  {
         // avisar que já tem
         if lista_arestas.contains(&aresta.1) {
             println!("O vertice {} já tem conexão com o vertice {}", aresta.0, aresta.1);
-        }else {
+        }else{
             lista_arestas.insert(aresta.1);
+
+            // Se o grafo for não direcionado irá adicionar a conexão na lista dos dois vértices
+            if self.direcionado == false {
+                let lista_arestas_v2 = self.arestas
+                .entry(aresta.1)
+                .or_insert_with(HashSet::new);
+
+                lista_arestas_v2.insert(aresta.0);
+            }
         }
     }
 
