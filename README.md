@@ -1,31 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API de Grafos</title>
-    <style>
-        /* Define o tamanho da fonte dos parágrafos */
-        p {
-            font-size: 15px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 25px 0;
-            font-size: 18px;
-            text-align: left;
-        }
-        th, td {
-            padding: 12px;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
-</head>
-<body>
+
 
 <h1>API de Grafos</h1>
 
@@ -40,7 +13,7 @@
 <h2>grafo_lib/grafo.rs</h2>
 <p>Arquivo que contém a classe grafo. Dentro da classe, existe o atributo matriz, que representa a implementação de uma matriz de adjacências, e o atributo arestas, que representa a implementação de uma lista de adjacências.</p>
 
-<h2>Tabela de Métodos</h2>
+<h2>Tabela de métodos da classe grafo</h2>
 
 <table>
     <thead>
