@@ -1,6 +1,5 @@
 use std::collections::{BTreeMap, HashSet};
 
-
 pub struct Grafo{
     // Struct de um Grafo que recebe inteiros como vertices e arestas como tupla
     // inteiros representando as duas arestas da conexao.

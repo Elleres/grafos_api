@@ -28,10 +28,14 @@ fn main() {
 
 
   // printa lista de adjacencias
-  println!("Grafo 1:");
-  grafo_1.print_arestas();
-  println!("Grafo 2:");
-  grafo_2.print_arestas();
+  // println!("Grafo 1:");
+  // grafo_1.print_arestas();
+  // println!("Grafo 2:");
+  // grafo_2.print_arestas();
+
+  let mut grafo_resultante = produto_cartesiano(grafo_1, grafo_2);
+
+  grafo_resultante.print_vertices();
 
   // cria matriz de adjacencias
   // grafo_matriz_instancia.criar_matriz();
