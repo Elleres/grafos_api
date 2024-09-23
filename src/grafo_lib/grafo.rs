@@ -1,5 +1,25 @@
 use std::collections::{BTreeMap, HashSet};
 
+pub struct Vertice {
+    pub nome: String,           // Nome do vértice
+    pub cor: String,            // Cor usada no DFS (WHITE, GRAY, BLACK)
+    pub tempo_descoberta: i32,  // Tempo de descoberta
+    pub tempo_termino: i32,     // Tempo de término
+    pub predecessor: Option<String>, // Predecessor no DFS
+}
+
+impl Vertice {
+    pub fn new(nome: String) -> Self {
+        Vertice {
+            nome,
+            cor: "WHITE".to_string(),  // Inicialmente todos os vértices são não visitados
+            tempo_descoberta: -1,
+            tempo_termino: -1,
+            predecessor: None,
+        }
+    }
+}
+
 pub struct Grafo{
     // Struct de um Grafo que recebe inteiros como vertices e arestas como tupla
     // inteiros representando as duas arestas da conexao.
@@ -8,7 +28,7 @@ pub struct Grafo{
     // O atributo matriz é a implementacao de uma matriz de adjacencia
     // O atributo matriz_acess é apenas para realizar o acesso na listas de forma correta
     // O atributo direcionado define se o grafo é direcionada ou não
-    pub vertices: Vec<String>,
+    pub vertices: BTreeMap<String, Vertice>,
     pub arestas: BTreeMap<String, HashSet<String>>,
     pub matriz: Vec<Vec<bool>>,
     pub matriz_acess: BTreeMap<String, usize>,
@@ -19,7 +39,7 @@ impl Grafo  {
     // Função constructor, aloca na memória espaco
     pub fn new(dir: bool) -> Self{
         Grafo {
-            vertices: Vec::new(), 
+            vertices: BTreeMap::new(), 
             matriz: Vec::new(),
             arestas: BTreeMap::new(),
             matriz_acess: BTreeMap::new(),
@@ -29,7 +49,8 @@ impl Grafo  {
     
     // Função insere vertice com valor inteiro na lista de vertices e na de arestas
     pub fn inserir_vertice(&mut self, vert: String){
-        self.vertices.push(vert.clone());
+        let vertice = Vertice::new(vert.clone());
+        self.vertices.insert(vert.clone(), vertice);
         self.arestas.insert(vert.clone(), HashSet::new());
     }
 
@@ -37,11 +58,11 @@ impl Grafo  {
     pub fn inserir_aresta(&mut self, aresta: (String, String)){
         // Bloco abaixo checa se os dois vertices já foram inseridos na lista de vertices
         // caso contrário, irá adicionar os que faltam.
-        if !self.vertices.contains(&aresta.1.clone()){
+        if !self.vertices.contains_key(&aresta.1.clone()){
             println!("Vertice {} foi inserido para criar a aresta.", aresta.1);
             self.inserir_vertice(aresta.1.clone());
         }
-        if !self.vertices.contains(&aresta.0){
+        if !self.vertices.contains_key(&aresta.0){
             println!("Vertice {} foi inserido para criar a aresta.", aresta.0);
             self.inserir_vertice(aresta.0.clone());
         }
@@ -129,9 +150,69 @@ impl Grafo  {
     // Printa o número de vértices
     pub fn print_vertices(&mut self){
         print!("Lista de vertices: ");
-        for vertice in self.vertices.iter(){
-            print!("{vertice} ")
+        for vertice in self.vertices.values(){
+            print!("{} ", vertice.nome)
         }
         println!()
+    }
+    
+    pub fn dfs(&mut self) {
+        let mut tempo = 0;
+
+        // Inicializa todos os vértices como não visitados (WHITE)
+        for vertice in self.vertices.values_mut() {
+            vertice.cor = "WHITE".to_string();
+            vertice.predecessor = None;
+        }
+
+        // Coletar as chaves dos vértices em uma lista para evitar o empréstimo imutável do mapa
+        let vertices_keys: Vec<String> = self.vertices.keys().cloned().collect();
+
+        // Para cada vértice ainda não visitado, chama DFS-Visit
+        for nome in vertices_keys {
+            if self.vertices[&nome].cor == "WHITE" {
+                self.dfs_visit(nome, &mut tempo);
+            }
+        }
+    }
+
+    // Função auxiliar DFS-Visit
+    fn dfs_visit(&mut self, u: String, tempo: &mut i32) {
+        *tempo += 1;
+
+        {
+            let vertice_u = self.vertices.get_mut(&u).unwrap();
+            vertice_u.tempo_descoberta = *tempo;
+            vertice_u.cor = "GRAY".to_string();
+        }
+
+        // Clonar a lista de adjacências para evitar múltiplos empréstimos mutáveis
+        let adjacentes: Vec<String> = self.arestas[&u].iter().cloned().collect();
+
+        // Explora todos os vértices adjacentes
+        for v in adjacentes {
+            let cor_v;
+            {
+                // Faz um empréstimo imutável temporário apenas para verificar a cor do vértice v
+                cor_v = self.vertices.get(&v).unwrap().cor.clone();
+            }
+
+            if cor_v == "WHITE" {
+                {
+                    // Faz um empréstimo mutável temporário para modificar o predecessor
+                    let vertice_v = self.vertices.get_mut(&v).unwrap();
+                    vertice_v.predecessor = Some(u.clone());
+                }
+                // Chama recursivamente o DFS-Visit
+                self.dfs_visit(v, tempo);
+            }
+        }
+
+        {
+            let vertice_u = self.vertices.get_mut(&u).unwrap();
+            vertice_u.cor = "BLACK".to_string();
+            *tempo += 1;
+            vertice_u.tempo_termino = *tempo;
+        }
     }
 }
