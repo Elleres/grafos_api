@@ -215,4 +215,64 @@ impl Grafo  {
             vertice_u.tempo_termino = *tempo;
         }
     }
+
+    pub fn ordenacao_topologica(&mut self) -> Vec<String> {
+        let mut tempo = 0;
+        let mut ordem: Vec<String> = Vec::new();
+
+        // Inicializa todos os vértices como não visitados (WHITE)
+        for vertice in self.vertices.values_mut() {
+            vertice.cor = "WHITE".to_string();
+            vertice.predecessor = None;
+        }
+
+        let vertices_keys: Vec<String> = self.vertices.keys().cloned().collect();
+
+        for nome in vertices_keys {
+            if self.vertices[&nome].cor == "WHITE" {
+                self.dfs_visit_ordenacao(nome, &mut tempo, &mut ordem);
+            }
+        }
+
+        // Inverte a ordem para obter a ordenação topológica correta
+        ordem.reverse();
+        ordem
+    }
+    
+    fn dfs_visit_ordenacao(&mut self, u: String, tempo: &mut i32, ordem: &mut Vec<String>) {
+        *tempo += 1;
+        {
+            let vertice_u = self.vertices.get_mut(&u).unwrap();
+            vertice_u.tempo_descoberta = *tempo;
+            vertice_u.cor = "GRAY".to_string();
+        }
+
+        let adjacentes: Vec<String> = self.arestas[&u].iter().cloned().collect();
+
+        for v in adjacentes {
+            let cor_v;
+            {
+                cor_v = self.vertices.get(&v).unwrap().cor.clone();
+            }
+
+            if cor_v == "WHITE" {
+                {
+                    let vertice_v = self.vertices.get_mut(&v).unwrap();
+                    vertice_v.predecessor = Some(u.clone());
+                }
+                self.dfs_visit_ordenacao(v, tempo, ordem);
+            }
+        }
+
+        {
+            let vertice_u = self.vertices.get_mut(&u).unwrap();
+            vertice_u.cor = "BLACK".to_string();
+            *tempo += 1;
+            vertice_u.tempo_termino = *tempo;
+
+            // Adiciona o vértice à lista de ordem topológica no final do processamento
+            ordem.push(u);
+        }
+    }
+
 }
