@@ -215,38 +215,34 @@ impl Grafo  {
             vertice_u.tempo_termino = *tempo;
         }
     }
-
-    pub fn ordenacao_topologica(&mut self) -> Vec<String> {
-        let mut tempo = 0;
-        let mut ordem: Vec<String> = Vec::new();
-
+    pub fn contem_ciclo(&mut self) -> bool {
         // Inicializa todos os vértices como não visitados (WHITE)
         for vertice in self.vertices.values_mut() {
             vertice.cor = "WHITE".to_string();
-            vertice.predecessor = None;
         }
 
+        // Coleta os nomes dos vértices
         let vertices_keys: Vec<String> = self.vertices.keys().cloned().collect();
 
+        // Para cada vértice ainda não visitado, chama DFS-Visit para verificar ciclos
         for nome in vertices_keys {
             if self.vertices[&nome].cor == "WHITE" {
-                self.dfs_visit_ordenacao(nome, &mut tempo, &mut ordem);
+                if self.dfs_ciclo(nome.clone()) {
+                    return true;  // Se um ciclo for encontrado, retorna true
+                }
             }
         }
 
-        // Inverte a ordem para obter a ordenação topológica correta
-        ordem.reverse();
-        ordem
+        false  // Nenhum ciclo encontrado
     }
-    
-    fn dfs_visit_ordenacao(&mut self, u: String, tempo: &mut i32, ordem: &mut Vec<String>) {
-        *tempo += 1;
+
+    fn dfs_ciclo(&mut self, u: String) -> bool {
         {
             let vertice_u = self.vertices.get_mut(&u).unwrap();
-            vertice_u.tempo_descoberta = *tempo;
-            vertice_u.cor = "GRAY".to_string();
+            vertice_u.cor = "GRAY".to_string();  // Marca como em exploração
         }
 
+        // Clonar a lista de adjacências para evitar múltiplos empréstimos mutáveis
         let adjacentes: Vec<String> = self.arestas[&u].iter().cloned().collect();
 
         for v in adjacentes {
@@ -255,24 +251,22 @@ impl Grafo  {
                 cor_v = self.vertices.get(&v).unwrap().cor.clone();
             }
 
-            if cor_v == "WHITE" {
-                {
-                    let vertice_v = self.vertices.get_mut(&v).unwrap();
-                    vertice_v.predecessor = Some(u.clone());
+            if cor_v == "GRAY" {
+                // Encontramos um vértice sendo explorado, existe um ciclo
+                return true;
+            } else if cor_v == "WHITE" {
+                if self.dfs_ciclo(v.clone()) {
+                    return true;  // Ciclo encontrado na recursão
                 }
-                self.dfs_visit_ordenacao(v, tempo, ordem);
             }
         }
 
         {
             let vertice_u = self.vertices.get_mut(&u).unwrap();
-            vertice_u.cor = "BLACK".to_string();
-            *tempo += 1;
-            vertice_u.tempo_termino = *tempo;
-
-            // Adiciona o vértice à lista de ordem topológica no final do processamento
-            ordem.push(u);
+            vertice_u.cor = "BLACK".to_string();  // Marca como totalmente explorado
         }
+
+        false  // Nenhum ciclo encontrado a partir deste vértice
     }
 
 }
